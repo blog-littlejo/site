@@ -1,0 +1,9 @@
+baseURL = 'https://example.org/'
+languageCode = 'fr'
+title = "Little jo's blog"
+theme = 'blowfish'
+
+[taxonomies]
+  tag = "tags"
+  category = "categories"
+  series = "series"

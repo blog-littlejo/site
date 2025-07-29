@@ -1,0 +1,19 @@
+# Hugo build output
+/public/
+/resources/_gen/
+/hugo_stats.json
+
+# Hugo cache
+/.hugo_build.lock
+/.hugo_cache/
+
+# OS & editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Node (si tu ajoutes du JS/CSS via npm)
+node_modules/
+package-lock.json
+
