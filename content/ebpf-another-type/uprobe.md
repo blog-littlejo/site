@@ -1,10 +1,11 @@
 +++
-date = '2025-07-29T07:43:35+02:00'
+date = '2025-07-21T07:43:35+02:00'
 draft = true
 title = "uProbe : l'observabilité pour tous les développeurs"
 series = ["Apprenons les programmes uProbe avec eBPF et Aya"]
 tags = ["Rust", "eBPF", "aya"]
 series_order = 1
+weight = 1
 +++
 
 Je débute la programmation en eBPF avec Aya. L’idée de cette série d’articles est d'apprendre un nouveau type de programme eBPF et de l'expérimenter avec le framework Rust Aya.

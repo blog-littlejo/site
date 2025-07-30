@@ -1,0 +1,38 @@
+disabled = false
+languageCode = "fr"
+languageName = "francais"
+weight = 1
+title = "Blowfish"
+
+[params]
+  displayName = "FR"
+  isoCode = "fr"
+  rtl = false
+  dateFormat = "2 Janvier 2006"
+  orderSectionsBy = "weight"
+  # logo = "img/logo.png"
+  # secondaryLogo = "img/secondary-logo.png"
+  # description = "My awesome website"
+  # copyright = "Copy, _right?_ :thinking_face:"
+
+[params.author]
+  name = "Joseph Ligier"
+  #email = ""
+  image = "/img/littlejo.jpg"
+  imageQuality = 96
+  headline = "I'm only human"
+  bio = "A little bit about you"
+  links = [
+    { bluesky = "https://bsky.app/profile/littlejo" },
+    { dev = "https://dev.to/littlejo" },
+    { github = "https://github.com/littlejo" },
+    { medium = "https://medium.com/@littel.jo" },
+    { ko-fi = "https://ko-fi.com/littlejo" },
+    #{ email = "mailto:hello@your_domain.com" },
+    #{ link = "https://link-to-some-website.com/" },
+    #{ gitlab = "https://gitlab.com/username" },
+    #{ linkedin = "https://linkedin.com/in/username" },
+    #{ twitch = "https://twitch.tv/username" },
+    #{ tiktok = "https://tiktok.com/@username" },
+    #{ patreon = "https://www.patreon.com/username" },
+  ]
