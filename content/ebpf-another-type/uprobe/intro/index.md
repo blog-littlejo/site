@@ -3,7 +3,7 @@ date = '2025-07-21T07:43:35+02:00'
 draft = true
 title = "uProbe : l'observabilité pour tous les développeurs"
 series = ["Apprenons les programmes uProbe avec eBPF et Aya"]
-tags = ["Rust", "eBPF", "aya"]
+tags = ["Rust", "eBPF", "aya", "intro"]
 series_order = 1
 weight = 1
 +++

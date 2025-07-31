@@ -16,6 +16,8 @@ buildFuture = false
 
 enableEmoji = true
 
+article.showHero = true
+
 # googleAnalytics = "G-XXXXXXXXX"
 
 [pagination]
