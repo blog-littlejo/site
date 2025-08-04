@@ -4,6 +4,7 @@ draft = true
 title = "Tracepoint : l'observabilité kernel pour tous"
 series = ["Apprenons Tracepoint avec eBPF et Aya", "Apprenons un autre programme eBPF"]
 tags = ["Rust", "eBPF", "aya", "intro"]
+summary = "Nous allons voir les bases des programmes eBPF de type Tracepoint avec Aya"
 series_order = 1
 +++
 

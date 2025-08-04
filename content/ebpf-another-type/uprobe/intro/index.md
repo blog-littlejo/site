@@ -1,9 +1,11 @@
 +++
 date = '2025-07-21T07:43:35+02:00'
+#lastmod = '2025-07-22T07:43:35+02:00'
 draft = true
 title = "uProbe : l'observabilité pour tous les développeurs"
 series = ["Apprenons uProbe avec eBPF et Aya", "Apprenons un autre programme eBPF"]
 tags = ["Rust", "eBPF", "aya", "intro"]
+summary = "Nous allons voir les bases des programmes eBPF de type uProbe et uRetProbes avec Aya"
 series_order = 1
 +++
 
