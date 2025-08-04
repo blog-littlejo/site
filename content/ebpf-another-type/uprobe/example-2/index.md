@@ -2,10 +2,9 @@
 date = '2025-07-23T07:56:34+02:00'
 draft = true
 title = "uProbe : Sondons une bibliothèque"
-series = ["Apprenons les programmes uProbe avec eBPF et Aya"]
+series = ["Apprenons uProbe avec eBPF et Aya"]
 tags = ["Rust", "eBPF", "aya"]
 series_order = 3
-weight = 3
 +++
 
 ## Hello world de uprobe

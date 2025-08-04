@@ -78,7 +78,7 @@ forgejoDefaultServer = "https://v11.next.forgejo.org"
   seriesOpened = false
   showHeadingAnchors = true
   showPagination = true
-  invertPagination = true
+  invertPagination = false
   showReadingTime = true
   showTableOfContents = true
   # showRelatedContent = false
@@ -112,7 +112,7 @@ forgejoDefaultServer = "https://v11.next.forgejo.org"
 
 [taxonomy]
   showTermCount = true
-  showHero = false
+  showHero = true
   # heroStyle = "background" # valid options: basic, big, background, thumbAndBackground
   showBreadcrumbs = false
   showViews = false

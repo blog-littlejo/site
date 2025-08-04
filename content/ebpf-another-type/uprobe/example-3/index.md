@@ -2,10 +2,9 @@
 date = '2025-07-24T07:56:34+02:00'
 draft = true
 title = "uProbe : Profilons un petit programme"
-series = ["Apprenons les programmes uProbe avec eBPF et Aya"]
+series = ["Apprenons uProbe avec eBPF et Aya"]
 tags = ["Rust", "eBPF", "aya"]
 series_order = 4
-weight = 4
 +++
 
 Le but de cet article est de regarder le temps que met une fonction à s'exécuter.

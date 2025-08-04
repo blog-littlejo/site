@@ -2,10 +2,9 @@
 date = '2025-07-22T07:56:34+02:00'
 draft = true
 title = "uProbe : Observons une fonction simple de ton programme"
-series = ["Apprenons les programmes uProbe avec eBPF et Aya"]
+series = ["Apprenons uProbe avec eBPF et Aya"]
 tags = ["Rust", "eBPF", "aya"]
 series_order = 2
-weight = 2
 +++
 
 Nous avons vu ce qu'était un programme de type uProbe.
