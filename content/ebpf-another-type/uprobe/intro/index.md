@@ -31,17 +31,17 @@ Si tu consultes la [documentation d'eBPF](https://docs.ebpf.io/linux/program-typ
 
 ### uProbe
 
-Contrairement aux **k**Probes qui sont dédiées à observer les fonctions du **k**ernel Linux, les **u**Probes sont dédiés aux fonctions de l'espace utilisateur : *User Probes*.
+Contrairement aux **k**Probes qui sont dédiées à observer les fonctions du **k**ernel Linux, les **u**Probes sont dédiés aux fonctions de l'espace utilisateur : *User Probes*. Par exemple, on pourrait s'en servir pour compter le nombre d'appels aux fonctions `malloc` et `free` dans un programme C.
 
-## uProbe et uRetProbe : les inséparables ?
+### uRetProbe
 
-u**Ret**Probe a pour but d'étudier le **ret**our de la fonction cible : *User Return Probes*. Ainsi en ayant les temps du uProbe et du uRetProbe, on peut avoir la durée que met une fonction à s'exécuter assez facilement. Il est ainsi possible de tracer chaque fonction de son programme. On pourrait par exemple l'utiliser pour des requêtes SQL où on identifierait les requêtes les plus longues.
+u**Ret**Probe a pour but d'étudier le **ret**our de la fonction cible : *User Return Probes*. On peut donc découvrir la valeur que retourne la fonction qui permet de debugger ou d'observer. Mais il y a un autre intérêt : en combinant les temps du uProbe et du uRetProbe, on peut récupérer la durée que met une fonction à s'exécuter assez facilement. Il est ainsi possible de profiler chaque fonction de son programme. On pourrait par exemple l'utiliser pour des requêtes SQL où on identifierait les requêtes les plus longues.
 
 ## Autres intérêts des u•Ret•Probes
 
-uProbe permet également de récupérer le contenu des arguments de chaque fonction appelée et débugger un programme dont tu n'as pas le code source. Ça peut donc être un bel outil de reverse engineering.
+uProbe permet également de récupérer le contenu des arguments de chaque fonction appelée et de débugger un programme dont tu n'as pas le code source. Ça peut donc être un bel outil de reverse engineering.
 
-Pour finir la présentation, ça peut paraître paradoxal de vouloir tracer un code utilisateur depuis l'espace noyau. Cependant cela a le mérite d'être non intrusif car il n'y a pas besoin de modifier le programme.
+Pour finir cette section, ça peut paraître paradoxal de vouloir tracer un code utilisateur depuis l'espace noyau. Cependant cela a le mérite d'être non intrusif car il n'y a pas besoin de modifier le programme.
 
 
 ---
@@ -58,26 +58,44 @@ Mais ils n'ont jamais été inclus dans le code principal à cause d'opposition 
 
 ## Habemus uProbe
 
-En 2012, le consensus a fini par arriver et les uProbes ont été introduites lors la version 3.5 du noyau Linux :
+En 2012, le consensus a fini par arriver et les uProbes ont été introduites lors de la version 3.5 du noyau Linux :
 
 [![Introducing uprobe](screenshot/uprobe-history.png)](https://lwn.net/Articles/499190/)
 
-Ils ont ensuite été améliorés avec la version 3.14 (sortie en 2014) :
+Elles ont ensuite été améliorées avec la version 3.14 (sortie en 2014) :
 
 [![Patching uprobe](screenshot/uprobe-history-2.png)](https://lwn.net/Articles/577142/)
 
 ## uProbe avec eBPF : une naissance silencieuse
 
-Je n'ai pas trouvé la date exacte de l'apparition des uprobes avec eBPF. Dans la documentation de kprobe, kprobe est apparu dans la version 4.1 (sortie en 2015). En voici le commit :
+Je n'ai pas trouvé la date exacte de l'apparition des uProbes avec eBPF. Dans la documentation de kprobe, kprobe est apparu dans la version 4.1 (sortie en 2015). En voici le commit :
 
 [![Patching kprobe eBPF](screenshot/uprobe-history-3.png)](https://github.com/torvalds/linux/commit/2541517c32be2531e0da59dfd7efc1ce844644f5)
 
 Mais il n'y a pas de trace pour la possibilité d'utiliser uprobe avec eBPF (si quelqu'un l'a trouvé, je n'hésiterai pas à modifier l'article).
-Cependant, on peut déjà l'utiliser depuis 2016 comme le montre le tutoriel de Brendan Gregg : 
+Cependant, on peut déjà l'utiliser depuis 2016 comme l'atteste le tutoriel de Brendan Gregg : 
 
 [![uprobe bcc eBPF tutorial](screenshot/uprobe-history-4.png)](https://www.brendangregg.com/blog/2016-02-08/linux-ebpf-bcc-uprobes.html)
 
-Il suffit juste tourner sur une distribution Linux moderne pour expérimenter cela.
+Il suffit juste de tourner sur une distribution Linux moderne pour expérimenter cela.
+
+---
+
+# Bonus Track
+
+Pour finir la présentation, voici quelques liens bien sympathiques :
+
+* Utilisation de uprobe **sans eBPF** par Brendan Gregg en 2015 :
+
+[![Brendan Gregg blog](screenshot/uprobe-brendan.png)](https://www.brendangregg.com/blog/2015-06-28/linux-ftrace-uprobe.html)
+
+* L'excellent blog de **Julia Evans** sur tous les systèmes de tracing sous Linux :
+
+[![Julia Evans blog](screenshot/linux-tracing.png)](https://jvns.ca/blog/2017/07/05/linux-tracing-systems/)
+
+* **bpftime** d'Eunomia :
+
+[![bpftime: Userspace eBPF runtime for Observability, Network & General extensions Framework](screenshot/bpftime.png)](https://eunomia.dev/en/bpftime/)
 
 Maintenant qu'on a présenté uProbe et uRetProbe, voyons comment les manipuler un peu plus concrètement avec Aya.
 
@@ -117,4 +135,5 @@ La seconde question demande la fonction du binaire ou de la bibliothèque que tu
 
 ---
 
-L'introduction aux programmes eBPF de type uProbe et uRetProbe est terminée. Dans les prochains épisodes, nous allons expérimenter tout cela avec Aya.
+La présentation des programmes eBPF de type uProbe et uRetProbe est terminée.
+Passons maintenant à la pratique : nous allons créer un petit programme et nous allons le faire réagir avec un programme eBPF de type uProbe avec Aya.
