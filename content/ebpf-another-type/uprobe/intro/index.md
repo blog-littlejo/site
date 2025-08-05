@@ -31,7 +31,7 @@ Si tu consultes la [documentation d'eBPF](https://docs.ebpf.io/linux/program-typ
 
 ### uProbe
 
-Contrairement aux **k**Probes qui sont dédiées à observer les fonctions du **k**ernel Linux, les **u**Probes sont dédiés aux fonctions de l'espace utilisateur : *User Probes*. Par exemple, on pourrait s'en servir pour compter le nombre d'appels aux fonctions `malloc` et `free` dans un programme C.
+Contrairement aux **k**Probes qui sont dédiées à observer les fonctions du **k**ernel Linux, les **u**Probes sont dédiées aux fonctions de l'espace utilisateur : *User Probes*. Par exemple, on pourrait s'en servir pour compter le nombre d'appels aux fonctions `malloc` et `free` dans un programme C.
 
 ### uRetProbe
 
@@ -39,7 +39,7 @@ u**Ret**Probe a pour but d'étudier le **ret**our de la fonction cible : *User R
 
 ## Autres intérêts des u•Ret•Probes
 
-uProbe permet également de récupérer le contenu des arguments de chaque fonction appelée et de débugger un programme dont tu n'as pas le code source. Ça peut donc être un bel outil de reverse engineering.
+uProbe permet également de récupérer le contenu des arguments de chaque fonction appelée et de débugger un programme dont tu n'as pas le code source. Ça peut donc être un bel outil de rétro-ingénierie (*reverse engineering*).
 
 Pour finir cette section, ça peut paraître paradoxal de vouloir tracer un code utilisateur depuis l'espace noyau. Cependant cela a le mérite d'être non intrusif car il n'y a pas besoin de modifier le programme.
 
@@ -50,11 +50,11 @@ Pour finir cette section, ça peut paraître paradoxal de vouloir tracer un code
 
 ## uTrace l'ancètre
 
-Vouloir tracer des fonctions de l'espace utilisateur depuis le kernel linux ne date pas de l'introduction d'eBPF. Par exemple, une (première ?) tentative est apparue en 2007 avec les utraces :
+Vouloir tracer des fonctions de l'espace utilisateur depuis le kernel linux ne date pas de l'introduction d'eBPF. Par exemple, une (première ?) tentative est apparue en 2007 avec les **utraces** :
 
 [![Introducing utrace](screenshot/utrace.png)](https://lwn.net/Articles/224772/)
 
-Mais ils n'ont jamais été inclus dans le code principal à cause d'opposition de certains mainteneurs.
+Mais elles n'ont jamais été incluses dans le code principal à cause d'opposition de certains mainteneurs.
 
 ## Habemus uProbe
 
@@ -68,16 +68,20 @@ Elles ont ensuite été améliorées avec la version 3.14 (sortie en 2014) :
 
 ## uProbe avec eBPF : une naissance silencieuse
 
-Je n'ai pas trouvé la date exacte de l'apparition des uProbes avec eBPF. Dans la documentation de kprobe, kprobe est apparu dans la version 4.1 (sortie en 2015). En voici le commit :
+Je n'ai pas trouvé la date exacte de l'apparition des uProbes avec eBPF. Dans la documentation de kProbe, kProbe est apparue en 2015 dans la version 4.1. En voici le commit :
 
 [![Patching kprobe eBPF](screenshot/uprobe-history-3.png)](https://github.com/torvalds/linux/commit/2541517c32be2531e0da59dfd7efc1ce844644f5)
 
-Mais il n'y a pas de trace pour la possibilité d'utiliser uprobe avec eBPF (si quelqu'un l'a trouvé, je n'hésiterai pas à modifier l'article).
-Cependant, on peut déjà l'utiliser depuis 2016 comme l'atteste le tutoriel de Brendan Gregg : 
+Mais il n'y a pas de trace pour la possibilité d'utiliser uProbe avec eBPF (si quelqu'un l'a trouvé, je n'hésiterai pas à modifier l'article).
+Cependant, on peut déjà l'utiliser [depuis 2016 avec BCC](https://github.com/iovisor/bcc/commit/948cefe14ba1f18aa49732c5f2f65837c79572be) comme l'atteste le tutoriel de Brendan Gregg : 
 
 [![uprobe bcc eBPF tutorial](screenshot/uprobe-history-4.png)](https://www.brendangregg.com/blog/2016-02-08/linux-ebpf-bcc-uprobes.html)
 
-Il suffit juste de tourner sur une distribution Linux moderne pour expérimenter cela.
+On peut voir également l'*issue* datant d'octobre 2015 :
+[![uprobe bcc issue](screenshot/uprobe-issue.png)](https://github.com/iovisor/bcc/issues/273)
+
+Donc a priori c'est sorti en même temps.
+
 
 ---
 
@@ -103,7 +107,7 @@ Maintenant qu'on a présenté uProbe et uRetProbe, voyons comment les manipuler 
 
 # Comment trouver les hooks ?
 
-Quand on démarre le développement d'un nouveau programme eBPF, la première difficulté est de réussir à le démarrer. Pour cela, il a besoin d'un événement déclencheur (event-driven). Dans cet épisode, cet événement sera le passage d'un uProbe et d'un uRetProbe dans le noyau Linux.
+Quand on démarre le développement d'un nouveau programme eBPF, la première difficulté est de réussir à le démarrer. Pour cela, il a besoin d'un événement déclencheur (event-driven). Dans cet épisode, cet événement sera le passage d'un uProbe ou d'un uRetProbe dans le noyau Linux.
 
 Aya nous facilite la tâche quand on lance la commande :
 ```Bash
@@ -121,7 +125,7 @@ La première bonne nouvelle c'est que les questions sont les mêmes pour uProbe 
 
 Essayons de répondre à ces questions maintenant.
 
-## Cible pour attacher le uProbe/uRetProbe
+## Cible pour attacher le u•Ret•Probe
 
 Pour la première question tu dois donner le nom d'une bibliothèque (comme la libc) ou le nom d'un binaire (dans un chemin absolu). La question aurait pu être posée autrement : quel fichier tu veux debugger ou tracer ?
 
@@ -129,9 +133,11 @@ Il faut voir ça comme un filtre.
 * Si tu choisis `libc`, tu auras toutes les chances que le programme eBPF tourne à chaque fois qu'un programme qui utilise la bibliothèque libc est démarré
 * Si tu choisis un binaire, il ne fonctionnera que si le binaire est exécuté.
 
-## Nom de la fonction pour attacher le uProbe/uRetProbe
+## Nom de la fonction pour attacher le u•Ret•Probe
 
-La seconde question demande la fonction du binaire ou de la bibliothèque que tu veux débugger. Par exemple si tu écris un programme, tu peux mettre le nom d'une fonction du programme. Ainsi à chaque fois que la fonction est appelée, le programme eBPF sera lancé. Si tu choisis quelque chose de beaucoup moins précis comme la bibliothèque libc et si tu choisi le syscall execve le programme eBPF se lancera à chaque fois qu'un programme qui utilise la libc s'exécute. Ça arrivera beaucoup plus.
+La seconde question demande la fonction du binaire ou de la bibliothèque que tu veux débugger.
+
+Par exemple si tu écris un programme, tu peux mettre le nom d'une fonction du programme. Ainsi à chaque fois que la fonction est appelée, le programme eBPF sera lancé. Si tu choisis quelque chose de beaucoup moins précis comme la bibliothèque libc et si tu choisi le syscall execve le programme eBPF se lancera à chaque fois qu'un programme qui utilise la libc s'exécute, ça arrivera beaucoup plus.
 
 ---
 
