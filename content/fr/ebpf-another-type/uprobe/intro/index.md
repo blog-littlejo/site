@@ -12,13 +12,15 @@ series_order = 1
 
 Je débute la programmation en eBPF avec Aya. L’idée de cette série d’articles est d'apprendre un nouveau type de programme eBPF et de l'expérimenter avec le framework Rust Aya.
 
-Aujourd'hui nous allons nous plonger dans les **uProbes** et les **uRetProbes** : des programmes eBPF qui sondent les fonctions de l'espace utilisateur.
+Aujourd'hui, nous allons nous plonger dans les **uProbes** et les **uRetProbes** : des programmes eBPF qui sondent les fonctions de l'espace utilisateur sans laisser de trace.
+
+Vous allez voir que cela peut être très intéressant pour du profilage, du débug ou de la rétro-ingénierie.
 
 {{< alert "lightbulb" >}}Si tu ne connais pas eBPF, je te conseille de lire les deux premières parties de ma série [S’initier à eBPF avec Aya](https://medium.com/@littel.jo/sinitier-%C3%A0-ebpf-avec-aya-c9d570560261). Cela couvre les bases et t'aidera pour la suite de l'article.{{< /alert >}}
 
 ---
 
-## Qu'est-ce qu'un u•Ret•Probe ?
+## Qu'est-ce qu'une u•Ret•Probe ?
 
 En anglais, une *probe* peut se traduire par une sonde pour examiner ou explorer quelque chose. En eBPF, il y en a de plusieurs types : kProbe, kRetProbe, uProbe, uRetProbe et USDT.
 
@@ -43,7 +45,8 @@ Contrairement aux **k**Probes qui sont dédiées à observer les fonctions du **
 
 ### uRetProbe
 
-u**Ret**Probe a pour but d'étudier le **ret**our de la fonction cible : *User Return Probes*. On peut donc découvrir la valeur que retourne la fonction qui permet de debugger ou d'observer. Mais il y a un autre intérêt : en combinant les temps de l'uProbe et de l'uRetProbe, on peut récupérer la durée que met une fonction à s'exécuter assez facilement. Il est ainsi possible de profiler chaque fonction de son programme.
+u**Ret**Probe a pour but d'étudier le **ret**our de la fonction cible de l'espace utilisateur : *User Return Probe*.
+On peut donc découvrir la valeur que retourne la fonction qui permet de debugger ou d'observer le comportement final de la fonction. Mais il y a un autre intérêt : en combinant les temps de l'uProbe et de l'uRetProbe, on peut récupérer la durée que met une fonction à s'exécuter assez facilement. Il est ainsi possible de profiler chaque fonction de son programme.
 
 {{< alert "lightbulb" >}}On pourrait par exemple l'utiliser pour des requêtes SQL où on identifierait les requêtes les plus longues.{{< /alert >}}
 
@@ -87,7 +90,7 @@ Dans la documentation eBPF de kProbe, kProbe est apparue en 2015 dans la version
 
 [![Patching kprobe eBPF](screenshot/uprobe-history-3.png)](https://github.com/torvalds/linux/commit/2541517c32be2531e0da59dfd7efc1ce844644f5)
 
-Comme un uProbe est un kProbe avec un point d'attache différent, on pouvait commencer à développer des uProbe avec eBPF à partir 2 avril 2015.
+Comme une uProbe est une kProbe avec un point d'attache différent, on pouvait commencer à développer des uProbe avec eBPF à partir 2 du avril 2015.
 
 Cependant il fallait encore attendre que les frameworks eBPF de l'époque puissent le gérer.
 
@@ -117,13 +120,13 @@ Pour finir la présentation, voici quelques liens bien sympathiques :
 
 [![bpftime: Userspace eBPF runtime for Observability, Network & General extensions Framework](screenshot/bpftime.png)](https://eunomia.dev/en/bpftime/)
 
-Maintenant qu'on a présenté uProbe et uRetProbe, voyons comment les manipuler un peu plus concrètement avec Aya.
+Maintenant qu'on a présenté uProbe et uRetProbe, voyons comment débuter son développement avec Aya.
 
 ---
 
 ## Comment trouver les hooks ?
 
-Quand on démarre le développement d'un nouveau programme eBPF, la première difficulté est de réussir à le démarrer. Pour cela, il a besoin d'un événement déclencheur (event-driven). Dans cet épisode, cet événement sera le passage d'un uProbe ou d'un uRetProbe dans le noyau Linux.
+Quand on démarre le développement d'un nouveau programme eBPF, la première difficulté est de réussir à le démarrer. Pour cela, il a besoin d'un événement déclencheur (event-driven). Dans cet épisode, cet événement sera le passage d'une uProbe ou d'une uRetProbe dans le noyau Linux.
 
 Aya nous facilite la tâche. Quand on lance la commande :
 ```Bash
@@ -139,7 +142,7 @@ Tu devras répondre à deux questions importantes qui permettront de définir le
 
 Essayons de répondre à ces questions maintenant.
 
-### Cible pour attacher le u•Ret•Probe
+### Cible pour attacher l'u•Ret•Probe
 
 Pour la première question tu dois donner le nom d'une bibliothèque (comme la libc) ou le nom d'un binaire (dans un chemin absolu). La question aurait pu être posée autrement : quel fichier tu veux debugger ou tracer ?
 
@@ -147,7 +150,7 @@ Il faut voir ça comme un filtre.
 * Si tu choisis `libc`, tu auras toutes les chances que le programme eBPF tourne à chaque fois qu'un programme qui utilise la bibliothèque libc est démarré
 * Si tu choisis un binaire, il ne fonctionnera que si le binaire est exécuté.
 
-### Nom de la fonction pour attacher le u•Ret•Probe
+### Nom de la fonction pour attacher l'u•Ret•Probe
 
 La seconde question demande la fonction du binaire ou de la bibliothèque que tu veux débugger.
 
