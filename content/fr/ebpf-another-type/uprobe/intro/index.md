@@ -90,7 +90,7 @@ Dans la documentation eBPF de kProbe, kProbe est apparue en 2015 dans la version
 
 [![Patching kprobe eBPF](screenshot/uprobe-history-3.png)](https://github.com/torvalds/linux/commit/2541517c32be2531e0da59dfd7efc1ce844644f5)
 
-Comme une uProbe est une kProbe avec un point d'attache différent, on pouvait commencer à développer des uProbe avec eBPF à partir 2 du avril 2015.
+Comme une uProbe est une kProbe avec un point d'attache différent, on pouvait commencer à développer des uProbe avec eBPF à partir du 2 avril 2015.
 
 Cependant il fallait encore attendre que les frameworks eBPF de l'époque puissent le gérer.
 
@@ -98,7 +98,7 @@ Ainsi on pouvait déjà l'utiliser [en 2016 avec BCC](https://github.com/iovisor
 
 [![uprobe bcc eBPF tutorial](screenshot/uprobe-history-4.png)](https://www.brendangregg.com/blog/2016-02-08/linux-ebpf-bcc-uprobes.html)
 
-On peut voir également l'*issue* sur github datant d'octobre 2015 :
+On peut voir également son *issue* sur github datant d'octobre 2015 :
 [![uprobe bcc issue](screenshot/uprobe-issue.png)](https://github.com/iovisor/bcc/issues/273)
 
 
@@ -116,7 +116,7 @@ Pour finir la présentation, voici quelques liens bien sympathiques :
 
 [![Julia Evans blog](screenshot/linux-tracing.png)](https://jvns.ca/blog/2017/07/05/linux-tracing-systems/)
 
-* **bpftime** d'Eunomia :
+* si les uProbes ne vous convient pas peut-être que le **bpftime** d'Eunomia peut vous intéresser :
 
 [![bpftime: Userspace eBPF runtime for Observability, Network & General extensions Framework](screenshot/bpftime.png)](https://eunomia.dev/en/bpftime/)
 
