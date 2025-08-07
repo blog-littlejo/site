@@ -4,48 +4,71 @@ draft = true
 title = "uProbe : Sondons une bibliothèque"
 series = ["Apprenons uProbe avec eBPF et Aya"]
 tags = ["Rust", "eBPF", "aya"]
+showTableOfContents = true
 series_order = 3
 +++
 
+Nous avons vu ce qu'était un programme de type uProbe dans [la première partie]({{< relref "ebpf-another-type/uprobe/intro/index.md" >}}) : ça peut être un moyen de sonder une bibliothèque.
+
+Nous allons créer un programme eBPF qui va observer la `libc` et une de ses fonctions : `execve`.
+
+{{< alert "bell" >}}Je suppose que vous êtes déjà dans un [environnement pour développer avec Aya](https://aya-rs.dev/book/start/development/). {{< /alert >}}
+
+---
+
 ## Hello world de uprobe
 
-Nous allons regarder la libc et quand le syscall execve est lancé.
+### Génération et compilation du programme Aya
 
-La commande cargo generate suivante permet de génerer le programme eBPF :
+La commande `cargo generate` suivante permet ainsi de génerer le programme eBPF :
 
 ```Bash
-cargo generate --name test-uprobe \
+cargo generate --name test-uprobe-2 \
                -d program_type=uprobe \
                -d uprobe_target=libc \
                -d uprobe_fn_name=execve \
                https://github.com/aya-rs/aya-template
 ```
 
-```Bash
-cd test-uprobe/
+Maintenant compilons le :
+
+```Fish
+cd test-uprobe-2/
 RUST_LOG=info cargo run
 ```
 
+### Test du programme
+
 Sur un autre terminal lancer un programme quelconque :
-```Bash
+```Fish
 ls
 ```
 
-Sur le terminal cargo run vous verrez :
+Sur le terminal `cargo run` vous verrez :
 ```
 [INFO  test_uprobe] function execve called by libc
 ```
 
-Ce programme eBPF rappelle beaucoup le programme eBPF de type tracepoint que j'avais créé lors [des articles d'initiation pour eBPF](https://medium.com/@littel.jo/sinitier-%C3%A0-ebpf-avec-aya-c9d570560261). Est-il possible également de récupérer le nom du binaire ?
+Ce programme eBPF rappelle beaucoup le programme eBPF de type *tracepoint* que j'avais créé lors [des articles d'initiation pour eBPF](https://medium.com/@littel.jo/sinitier-%C3%A0-ebpf-avec-aya-c9d570560261). Est-il possible également de récupérer le nom du binaire ?
 
 ## Récupérons le nom du binaire
 
+### Comment trouver les arguments du syscall ?
+
 Quels sont les arguments du syscall execve ? Pour le savoir, il suffit de taper :
-```
+```Fish
 man execve
 ```
 
 ![man execve](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/rjyu4ran2cxh5gpldyoq.png)
+
+La partie importante pour nous est :
+
+```C
+int execve(const char *pathname, char *const _Nullable argv[],
+                  char *const _Nullable envp[]);
+```
+
 
 On voit que la fonction a trois arguments :
 * `pathname`: le nom de la commande avec le chemin complet (exemple `/bin/bash`). Il est de type `const char *` (équivalent en rust à `*const u8`).
@@ -54,16 +77,18 @@ On voit que la fonction a trois arguments :
 
 Il faut donc récupérer le premier argument.
 
-Nous devons modifier la fonction suivante du fichier `test-uprobe-ebpf/main.rs`:
+### Modifions le code Aya
+
+Nous devons modifier la fonction suivante du fichier `test-uprobe-2-ebpf/src/main.rs`:
 
 ```Rust
-fn try_test_uprobe(ctx: ProbeContext) -> Result<u32, u32> {
+fn try_test_uprobe_2(ctx: ProbeContext) -> Result<u32, u32> {
     info!(&ctx, "function execve called by libc");
     Ok(0)
 }
 ```
 
-Il faut donc chercher à manipuler la variable ctx. Voici [la documentation](https://docs.rs/aya-ebpf/latest/aya_ebpf/programs/probe/struct.ProbeContext.html) :
+Il faut donc chercher à manipuler la variable `ctx`. Voici [la documentation](https://docs.rs/aya-ebpf/latest/aya_ebpf/programs/probe/struct.ProbeContext.html) :
 
 ![Documentation of ProbeContext](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/fsd4lhe89zgzpqito4bd.png)
 
@@ -82,7 +107,7 @@ let arg0: *const u8  = ctx.arg(0).ok_or(1u32)?;
 De manière similaire qu'avec les Tracepoints, on se retrouve avec :
 
 ```Rust
-fn try_test_uprobe(ctx: ProbeContext) -> Result<u32, i64> {
+fn try_test_uprobe_2(ctx: ProbeContext) -> Result<u32, i64> {
     let arg0: *const u8  = ctx.arg(0).ok_or(1u32)?;
     let mut buf = [0u8; 128];
     let filename = unsafe {
@@ -94,11 +119,46 @@ fn try_test_uprobe(ctx: ProbeContext) -> Result<u32, i64> {
 }
 ```
 
-Nous étions resté à ce niveau là pour les articles d'initiation avec les Tracepoints. Mais nous aurions également pu aller plus loin en récupérant les arguments et les variables d'environnement.
+### Testons maintenant la modification
+
+Vérifions que le code fonctionne toujours :
+
+```fish
+RUST_LOG=info cargo run
+```
+
+Sur un autre terminal, lançons une commande quelconque :
+```fish
+ls
+```
+
+Sur le terminal `cargo run` vous verrez :
+```
+[INFO  test_uprobe_2] function execve called by libc /usr/bin/ls
+```
+
+Nous étions resté à ce niveau là pour les articles d'initiation avec les Tracepoints. Mais nous aurions également pu aller plus loin en récupérant les arguments et les variables d'environnement. Voyons comment le faire.
 
 ## Récupérons les arguments de la commande
 
-Regardons maintenant comment récupérer les différents arguments de la fonction. Pour cela, il faut rajouter ce bout de code :
+### Quel argument du syscall ?
+
+```Fish
+man execve
+```
+
+La partie importante pour nous est :
+
+```C
+int execve(const char *pathname, char *const _Nullable argv[],
+                  char *const _Nullable envp[]);
+```
+
+Il faut donc récupérer le deuxième argument.
+
+### Modifions le code Aya
+
+C'est à dire qu'il faut rajouter ce bout de code :
 ```Rust
     let argv: *const *const u8   = ctx.arg(1).ok_or(1u32)?;
 ```
@@ -137,6 +197,63 @@ let argname = unsafe {
 info!(&ctx, "function execve called by libc {}", argname);
 ```
 
+### Testons maintenant la modification
+
+Vérifions que le code fonctionne toujours :
+
+```fish
+RUST_LOG=info cargo run
+```
+
+Sur un autre terminal, lançons une commande avec une option :
+```fish
+ls -lrt
+```
+
+Sur le terminal `cargo run` vous verrez :
+```
+[INFO  test_uprobe_2] function execve called by libc /usr/bin/ls
+[INFO  test_uprobe_2] function execve called by libc -lrt
+```
+
+C'est le comportement qu'on voulait.
+
+Si on lance une commande sans option que se passe-t-il ?
+```fish
+man
+```
+
+Sur le terminal `cargo run` vous verrez :
+```
+[INFO  test_uprobe_2] function execve called by libc /usr/bin/man
+```
+
+Que s'est-il passé ?
+
+Cette partie du code ne s'est pas affiché :
+
+```Rust
+info!(&ctx, "function execve called by libc {}", argname);
+```
+
+Comme la commande n'a pas d'argument, cette partie du code est partie en erreur :
+ 
+```Rust
+let argname = unsafe {
+    let argv1 = argv.add(1);
+    let argv1_deref: *const u8 = bpf_probe_read_user(argv1)?;
+    let argname_bytes = bpf_probe_read_user_str_bytes(argv1_deref, &mut buf)?;
+    from_utf8_unchecked(argname_bytes)
+};
+```
+
+Et donc il n'est jamais passé dans le dernier `info`.
+
 ---
 
-Je vous laisse le travail pour afficher les n arguments et les n variables d'environnement.
+La récupération des variables d'environnement de la commande est très similaire vu qu'il est du même type que pour les arguments.
+
+Cet épisode est maintenant terminé ! J'espère que vous l'avez apprécié et qu'il n'était pas trop compliqué.
+
+Dans [le prochain épisode]({{< relref "ebpf-another-type/uprobe/example-3/index.md" >}}), nous allons voir comment profiler une fonction d'un programme.
+

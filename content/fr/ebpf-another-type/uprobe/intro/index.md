@@ -162,4 +162,4 @@ Ainsi à chaque fois que la fonction est appelée par ce programme, le programme
 ---
 
 La présentation des programmes eBPF de type uProbe et uRetProbe est terminée.
-Passons maintenant à la pratique : nous allons créer un petit programme et nous allons le faire réagir avec un programme eBPF de type uProbe avec Aya.
+Passons maintenant à [la pratique]({{< relref "ebpf-another-type/uprobe/example-1/index.md" >}}) : nous allons créer un petit programme et nous allons le faire réagir avec un programme eBPF de type uProbe avec Aya.
