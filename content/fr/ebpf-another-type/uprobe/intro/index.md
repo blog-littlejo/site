@@ -144,7 +144,7 @@ Pour finir la présentation, je vous partage quelques liens bien sympathiques en
 
 [![Julia Evans zine](screenshot/linux-tracing.png)](https://jvns.ca/linux-tracing-zine.pdf)
 
-* si les uProbes ne vous conviennent pas, peut-être que les **bpftimes** d'Eunomia peuvent vous intéresser :
+* Si les uProbes ne vous conviennent pas, peut-être que les **bpftimes** d'Eunomia peuvent vous intéresser :
 
 [![bpftime: Userspace eBPF runtime for Observability, Network & General extensions Framework](screenshot/bpftime.png)](https://eunomia.dev/en/bpftime/)
 
@@ -152,7 +152,7 @@ Maintenant qu'on a présenté uProbe et uRetProbe, voyons comment débuter son d
 
 ---
 
-## Comment trouver les hooks ?
+## Comment débuter son programme Aya ?
 
 Quand on démarre le développement d'un nouveau programme eBPF, la première difficulté est de réussir à le démarrer. Pour cela, il a besoin d'un événement déclencheur (event-driven). Dans cet épisode, cet événement sera le passage d'une uProbe ou d'une uRetProbe dans le noyau Linux.
 
@@ -168,24 +168,25 @@ Tu devras répondre à deux questions importantes qui permettront de définir le
 🤷   Function name to attach the (u|uret)probe? (e.g getaddrinfo):
 ```
 
-Essayons de répondre à ces questions maintenant.
+Voyons comment y répondre.
 
 ### Cible pour attacher l'u•Ret•Probe
 
-Pour la première question tu dois donner le nom d'une bibliothèque (comme la `libc`) ou le nom d'un binaire (dans un chemin absolu). La question aurait pu être posée autrement : quel fichier tu veux debugger ou tracer ?
+La première question demande le nom d'une bibliothèque (comme la `libc`) ou d'un binaire (en chemin absolu). La question aurait pu être posée autrement : quel fichier tu veux debugger ou tracer ?
 
 Il faut voir ça comme un filtre :
-* Si tu choisis `libc`, tu auras toutes les chances que le programme eBPF tourne à chaque fois qu'un programme qui utilise la bibliothèque `libc` est démarré
-* Si tu choisis un binaire, il ne fonctionnera que si le binaire est exécuté.
+* Si tu choisis `libc`, il ne pourra démarrer que si un programme de la `libc` est exécuté
+* Si tu choisis un binaire, il ne pourra démarrer que si le binaire est exécuté.
+
+Mais cela n'est pas suffisant pour démarrer le programme eBPF. Il faut être plus précis : donner le nom d'une fonction.
 
 ### Nom de la fonction pour attacher l'u•Ret•Probe
 
-La seconde question demande la fonction du binaire ou de la bibliothèque que tu veux débugger.
+La seconde question demande ainsi la fonction du binaire ou de la bibliothèque que tu veux débugger.
 
 Par exemple :
-* si tu écris un programme en C, tu peux mettre le nom d'une fonction du programme.
-Ainsi à chaque fois que la fonction est appelée par ce programme, le programme eBPF sera lancé.
-* si tu choisis quelque chose de beaucoup moins précis comme la bibliothèque `libc` et si tu choisis le syscall `execve` le programme eBPF se lancera à chaque fois qu'un programme qui utilise la libc s'exécute, ça arrivera beaucoup plus.
+* si tu choisis le nom d'une fonction d'un programme C, le programme eBPF sera lancé à chaque fois qu'il passe par cette fonction.
+* si tu choisis les syscalls `execve` de la `libc`, le programme eBPF sera lancé à chaque fois qu'un programme de la `libc` sera exécuté.
 
 ---
 
