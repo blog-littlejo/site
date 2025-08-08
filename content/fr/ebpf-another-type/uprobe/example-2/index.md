@@ -18,6 +18,14 @@ Nous allons créer un programme eBPF qui va observer la `libc` et une de ses fon
 
 ## Hello world de uprobe
 
+Nous avons donc déjà les réponses aux deux questions :
+```
+🤷   Target to attach the (u|uret)probe? (e.g libc):
+🤷   Function name to attach the (u|uret)probe? (e.g getaddrinfo):
+```
+
+Voyons comment créer un programme eBPF Hello world pour ce *hook*.
+
 ### Génération et compilation du programme Aya
 
 La commande `cargo generate` suivante permet ainsi de génerer le programme eBPF :
@@ -71,9 +79,9 @@ int execve(const char *pathname, char *const _Nullable argv[],
 
 
 On voit que la fonction a trois arguments :
-* `pathname`: le nom de la commande avec le chemin complet (exemple `/bin/bash`). Il est de type `const char *` (équivalent en rust à `*const u8`).
-* `argv`: un ensemble d'arguments de la commande. Il est de type `char *const _Nullable[]` (équivalent en rust à `*const *const u8`)
-* `envp` : un ensemble de variables d'environnement de la commande. Il est de type `char *const _Nullable[]` (équivalent en rust à `*const *const u8`).
+* `pathname`: le nom de la commande avec le chemin complet (exemple `/bin/bash`). Il est de type `const char *` (équivalent en Rust à `*const u8`).
+* `argv`: un ensemble d'arguments de la commande. Il est de type `char *const _Nullable[]` (équivalent en Rust à `*const *const u8`)
+* `envp` : un ensemble de variables d'environnement de la commande. Il est de type `char *const _Nullable[]` (équivalent en Rust à `*const *const u8`).
 
 Il faut donc récupérer le premier argument.
 
@@ -119,6 +127,8 @@ fn try_test_uprobe_2(ctx: ProbeContext) -> Result<u32, i64> {
 }
 ```
 
+{{< alert "lightbulb" >}}Notez le nom de la fonction `bpf_probe_read_user_str_bytes` qui prend tout son sens ici.{{< /alert >}}
+
 ### Testons maintenant la modification
 
 Vérifions que le code fonctionne toujours :
@@ -143,6 +153,8 @@ Nous étions resté à ce niveau là pour les articles d'initiation avec les Tra
 
 ### Quel argument du syscall ?
 
+Nous l'avons déjà vu, il suffit de lancer cette commande :
+
 ```Fish
 man execve
 ```
@@ -154,11 +166,11 @@ int execve(const char *pathname, char *const _Nullable argv[],
                   char *const _Nullable envp[]);
 ```
 
-Il faut donc récupérer le deuxième argument.
+Il faut donc récupérer le deuxième argument de la fonction `execve`.
 
 ### Modifions le code Aya
 
-C'est à dire qu'il faut rajouter ce bout de code :
+Ainsi il faut rajouter ce bout de code :
 ```Rust
     let argv: *const *const u8   = ctx.arg(1).ok_or(1u32)?;
 ```
@@ -167,7 +179,7 @@ Comment récupérer le nième argument de la fonction ? Il faut utiliser la fonc
 
 ![Method add documentation](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/zx5o7dq3u99o2tl5mtog.png)
 
-Par exemple :
+Par exemple, pour récupérer le deuxième argument (le premier argument est le nom du binaire, on l'a déjà) :
 
 ```Rust
 let argv1 = argv.add(1);
@@ -175,7 +187,7 @@ let argv1 = argv.add(1);
 
 Par contre arg1 est encore de structure `*const *const u8`. Il faut réussir à le déréférencer pour obtenir `*const u8`.
 
-La bonne nouvelle c'est qu'il y a une fonction toute prête pour cela : `bpf_probe_read_user`. En voici [la documentation](https://docs.rs/aya-ebpf/latest/aya_ebpf/helpers/fn.bpf_probe_read_user.html) :
+Il y a une fonction toute prête pour cela : `bpf_probe_read_user`. En voici [la documentation](https://docs.rs/aya-ebpf/latest/aya_ebpf/helpers/fn.bpf_probe_read_user.html) :
 
 ![bpf_probe_read_user documentation](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/d4azamrdz6sgxrnvwp90.png)
 
@@ -223,7 +235,7 @@ Si on lance une commande sans option que se passe-t-il ?
 man
 ```
 
-Sur le terminal `cargo run` vous verrez :
+Sur le terminal `cargo run` vous ne verrez que :
 ```
 [INFO  test_uprobe_2] function execve called by libc /usr/bin/man
 ```
@@ -251,7 +263,16 @@ Et donc il n'est jamais passé dans le dernier `info`.
 
 ---
 
+## Le code
+
 La récupération des variables d'environnement de la commande est très similaire vu qu'il est du même type que pour les arguments.
+
+Voici le code complet :
+
+TODO
+
+---
+
 
 Cet épisode est maintenant terminé ! J'espère que vous l'avez apprécié et qu'il n'était pas trop compliqué.
 

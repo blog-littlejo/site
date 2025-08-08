@@ -48,7 +48,7 @@ go build -gcflags="all=-N -l" -o hello hello.go
 
 ## Comment trouver les hooks ?
 
-Maintenant qu'on a créé et compilé le petit programme. Il faut maintenant trouver comment déclencher le programme eBPF. Il faut répondre à deux questions : où se trouve le nom du binaire et quelle fonction observée. Voyons celà en détail.
+Maintenant qu'on a créé et compilé le petit programme. Il faut maintenant trouver comment déclencher le programme eBPF. Il faut répondre à deux questions : où se trouve le nom du binaire et quelle fonction observée. Voyons cela en détail.
 
 Pour la question :
 ```
@@ -157,7 +157,7 @@ cd test-uprobe/
 RUST_LOG=info cargo run
 ```
 
-Cela va prendre un peu de temps :
+Cela va prendre un peu de temps la première fois :
 
 ```
 Updating crates.io index
@@ -186,7 +186,7 @@ Laisser le programme Aya tourné et sur un autre terminal, lancer le programme q
 ./hello
 ```
 
-Sur le terminal où on a lancé `cargo run`, Vous devriez voir la sortie suivante à chanque fois que vous lancez le programme :
+Sur le terminal où on a lancé `cargo run`, Vous devriez voir la sortie suivante à chaque fois que vous lancez le programme :
 
 ```
 [INFO  test_uprobe] function main.hello called by /home/cloud_user/hello
